@@ -1,15 +1,33 @@
 #include <Arduino.h>
 #include <Adafruit_MotorShield.h>
 
-// Create the motor shield object with the default I2C address
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-// Or, create it with a different I2C address (say for stacking)
-// Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61);
 
-// Select which 'port' M1, M2, M3 or M4. In this case, M1
-Adafruit_DCMotor *myMotor = AFMS.getMotor(4);
-// You can also make another motor on port M2
-//Adafruit_DCMotor *myOtherMotor = AFMS.getMotor(2);
+Adafruit_DCMotor *motor1 = AFMS.getMotor(1);
+Adafruit_DCMotor *motor2 = AFMS.getMotor(2);
+Adafruit_DCMotor *motor3 = AFMS.getMotor(3);
+Adafruit_DCMotor *motor4 = AFMS.getMotor(4);
+
+int timer = 167;           // The higher the number, the slower the timing.
+int ledPins[] = { 3, 2, 4, 1, 1, 2, 4, 3, 2, 4, 3, 1, 13, 13, 13, 13, 13, 13, 13, 13, 2, 4, 3, 1, 2, 1, 3, 4, 1, 3, 4, 2 };
+// an array of pin numbers to which LEDs are attached Pin 13 is a pause
+int pinCount = 32;           // the number of pins (i.e. the length of the array)
+
+void setupMotors() {
+  AFMS.begin();
+  motor1->setSpeed(255);
+  motor2->setSpeed(255);
+  motor3->setSpeed(255);
+  motor4->setSpeed(255);
+  motor1->run(FORWARD);
+  motor2->run(FORWARD);
+  motor3->run(FORWARD);
+  motor4->run(FORWARD);
+  motor1->run(RELEASE);
+  motor2->run(RELEASE);
+  motor3->run(RELEASE);
+  motor4->run(RELEASE);
+}
 
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
@@ -21,30 +39,42 @@ void setup() {
     while (1);
   }
   Serial.println("Motor Shield found.");
-
-  // Set the speed to start, from 0 (off) to 255 (max speed)
-  myMotor->setSpeed(255);
-  myMotor->run(FORWARD);
-  // turn on motor
-  myMotor->run(RELEASE);
+  setupMotors();
 }
 
 void loop() {
-  uint8_t i;
+for (int thisPin = 0; thisPin < pinCount; thisPin++) {
 
-  Serial.print("tick");
-
-  myMotor->run(FORWARD);
-  for (i=0; i<255; i++) {
-    myMotor->setSpeed(i);
-    delay(10);
+  switch (ledPins[thisPin]) { 
+    case 1:
+     motor1->run(FORWARD);
+      motor1->setSpeed(255);  
+      delay(timer);
+      motor1->run(RELEASE);
+      break;
+    case 2:
+      motor2->run(FORWARD);
+      motor2->setSpeed(255);  
+      delay(timer);
+      motor2->run(RELEASE);
+      break;
+    case 3:
+      motor3->run(FORWARD);
+      motor3->setSpeed(255);  
+      delay(timer);
+      motor3->run(RELEASE);
+      break;
+    case 4:
+      motor4->run(FORWARD);
+      motor4->setSpeed(255);  
+      delay(timer);
+      motor4->run(RELEASE);
+      break;
+    case 13:
+      digitalWrite(13, HIGH);
+      delay(timer);
+      digitalWrite(13, LOW);
+      break;
   }
-  for (i=255; i!=0; i--) {
-    myMotor->setSpeed(i);
-    delay(10);
-  }
-
-  Serial.print("tech");
-  myMotor->run(RELEASE);
-  delay(1000);
+}
 }
